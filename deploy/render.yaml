@@ -1,0 +1,36 @@
+databases:
+  - name: ioms-postgres
+    plan: free
+    databaseName: ioms
+    user: ioms
+
+services:
+  - type: web
+    name: ioms-backend
+    runtime: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ioms-postgres
+          property: connectionString
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: JWT_EXPIRE_MINUTES
+        value: "60"
+      - key: APP_ENV
+        value: production
+      - key: APP_NAME
+        value: IOMS
+      - key: LOW_STOCK_THRESHOLD
+        value: "10"
+      - key: BACKEND_CORS_ORIGINS
+        sync: false
+      - key: RUN_SEED
+        value: "false"
