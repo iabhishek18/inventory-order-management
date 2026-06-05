@@ -1,4 +1,5 @@
-from typing import Any, Dict, Generator
+from collections.abc import Generator
+from typing import Any
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
@@ -10,7 +11,7 @@ class Base(DeclarativeBase):
     pass
 
 
-def _build_engine_kwargs(url: str) -> Dict[str, Any]:
+def _build_engine_kwargs(url: str) -> dict[str, Any]:
     if url.startswith("sqlite"):
         return {"echo": False}
     return {

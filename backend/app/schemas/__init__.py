@@ -1,6 +1,5 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
@@ -20,8 +19,8 @@ class Token(BaseModel):
 
 
 class TokenPayload(BaseModel):
-    sub: Optional[str] = None
-    exp: Optional[int] = None
+    sub: str | None = None
+    exp: int | None = None
 
 
 class UserBase(BaseModel):
@@ -47,7 +46,7 @@ class LoginRequest(BaseModel):
 class ProductBase(BaseModel):
     name: str = Field(min_length=1, max_length=255)
     sku: str = Field(min_length=1, max_length=64)
-    description: Optional[str] = Field(default=None, max_length=1000)
+    description: str | None = Field(default=None, max_length=1000)
     price: Decimal = Field(ge=0, decimal_places=2)
     quantity_in_stock: int = Field(ge=0)
 
@@ -65,11 +64,11 @@ class ProductCreate(ProductBase):
 
 
 class ProductUpdate(BaseModel):
-    name: Optional[str] = Field(default=None, min_length=1, max_length=255)
-    sku: Optional[str] = Field(default=None, min_length=1, max_length=64)
-    description: Optional[str] = Field(default=None, max_length=1000)
-    price: Optional[Decimal] = Field(default=None, ge=0, decimal_places=2)
-    quantity_in_stock: Optional[int] = Field(default=None, ge=0)
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    sku: str | None = Field(default=None, min_length=1, max_length=64)
+    description: str | None = Field(default=None, max_length=1000)
+    price: Decimal | None = Field(default=None, ge=0, decimal_places=2)
+    quantity_in_stock: int | None = Field(default=None, ge=0)
 
 
 class ProductOut(ProductBase, ORMModel):
@@ -82,7 +81,7 @@ class CustomerBase(BaseModel):
     full_name: str = Field(min_length=1, max_length=255)
     email: EmailStr
     phone: str = Field(min_length=3, max_length=32)
-    address: Optional[str] = Field(default=None, max_length=500)
+    address: str | None = Field(default=None, max_length=500)
 
 
 class CustomerCreate(CustomerBase):
@@ -101,7 +100,7 @@ class OrderItemCreate(BaseModel):
 
 class OrderCreate(BaseModel):
     customer_id: int = Field(gt=0)
-    items: List[OrderItemCreate] = Field(min_length=1)
+    items: list[OrderItemCreate] = Field(min_length=1)
 
 
 class OrderItemOut(ORMModel):
@@ -121,7 +120,7 @@ class OrderOut(ORMModel):
     customer_email: EmailStr
     status: str
     total_amount: Decimal
-    items: List[OrderItemOut]
+    items: list[OrderItemOut]
     created_at: datetime
 
 
@@ -141,4 +140,4 @@ class DashboardSummary(BaseModel):
     total_orders: int
     low_stock_count: int
     low_stock_threshold: int
-    low_stock_products: List[ProductOut]
+    low_stock_products: list[ProductOut]

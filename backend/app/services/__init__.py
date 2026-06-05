@@ -1,5 +1,4 @@
 from decimal import Decimal
-from typing import List
 
 from fastapi import HTTPException, status
 from sqlalchemy import func, select
@@ -39,7 +38,7 @@ def authenticate_user(db: Session, email: str, password: str) -> User:
     return user
 
 
-def list_products(db: Session) -> List[Product]:
+def list_products(db: Session) -> list[Product]:
     return list(db.scalars(select(Product).order_by(Product.id.desc())))
 
 
@@ -59,7 +58,7 @@ def create_product(db: Session, payload: schemas.ProductCreate) -> Product:
         db.commit()
     except IntegrityError:
         db.rollback()
-        raise _http(status.HTTP_409_CONFLICT, "SKU already exists")
+        raise _http(status.HTTP_409_CONFLICT, "SKU already exists") from None
     db.refresh(product)
     return product
 
@@ -67,9 +66,12 @@ def create_product(db: Session, payload: schemas.ProductCreate) -> Product:
 def update_product(db: Session, product_id: int, payload: schemas.ProductUpdate) -> Product:
     product = get_product(db, product_id)
     updates = payload.model_dump(exclude_unset=True)
-    if "sku" in updates and updates["sku"] != product.sku:
-        if db.scalar(select(Product).where(Product.sku == updates["sku"])):
-            raise _http(status.HTTP_409_CONFLICT, "SKU already exists")
+    if (
+        "sku" in updates
+        and updates["sku"] != product.sku
+        and db.scalar(select(Product).where(Product.sku == updates["sku"]))
+    ):
+        raise _http(status.HTTP_409_CONFLICT, "SKU already exists")
     for k, v in updates.items():
         setattr(product, k, v)
     db.commit()
@@ -91,7 +93,7 @@ def delete_product(db: Session, product_id: int) -> None:
     db.commit()
 
 
-def list_customers(db: Session) -> List[Customer]:
+def list_customers(db: Session) -> list[Customer]:
     return list(db.scalars(select(Customer).order_by(Customer.id.desc())))
 
 
@@ -111,7 +113,7 @@ def create_customer(db: Session, payload: schemas.CustomerCreate) -> Customer:
         db.commit()
     except IntegrityError:
         db.rollback()
-        raise _http(status.HTTP_409_CONFLICT, "Email already registered")
+        raise _http(status.HTTP_409_CONFLICT, "Email already registered") from None
     db.refresh(customer)
     return customer
 
@@ -155,7 +157,7 @@ def _serialize_order(order: Order) -> schemas.OrderOut:
     )
 
 
-def list_orders(db: Session) -> List[schemas.OrderListItem]:
+def list_orders(db: Session) -> list[schemas.OrderListItem]:
     rows = db.execute(
         select(
             Order.id,
@@ -221,7 +223,7 @@ def create_order(db: Session, payload: schemas.OrderCreate) -> schemas.OrderOut:
         )
 
     total = Decimal("0.00")
-    order_items: List[OrderItem] = []
+    order_items: list[OrderItem] = []
     for product_id, qty in consolidated.items():
         product = products[product_id]
         if product.quantity_in_stock < qty:

@@ -1,5 +1,4 @@
-from datetime import datetime, timedelta, timezone
-from typing import Any, Optional, Tuple, Union
+from datetime import UTC, datetime, timedelta
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -27,10 +26,10 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 
 def create_access_token(
-    subject: Union[str, int], expires_minutes: Optional[int] = None
-) -> Tuple[str, int]:
+    subject: str | int, expires_minutes: int | None = None
+) -> tuple[str, int]:
     expires_in = expires_minutes or settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES
-    expire = datetime.now(timezone.utc) + timedelta(minutes=expires_in)
+    expire = datetime.now(UTC) + timedelta(minutes=expires_in)
     payload: dict = {"sub": str(subject), "exp": expire}
     token = jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
     return token, expires_in * 60

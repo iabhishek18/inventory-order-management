@@ -1,6 +1,5 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional
 
 from sqlalchemy import (
     CheckConstraint,
@@ -48,11 +47,11 @@ class Product(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     sku: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
-    description: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
+    description: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     price: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     quantity_in_stock: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
-    order_items: Mapped[List["OrderItem"]] = relationship(
+    order_items: Mapped[list["OrderItem"]] = relationship(
         back_populates="product", cascade="save-update"
     )
 
@@ -64,9 +63,9 @@ class Customer(Base, TimestampMixin):
     full_name: Mapped[str] = mapped_column(String(255), nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     phone: Mapped[str] = mapped_column(String(32), nullable=False)
-    address: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    address: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
-    orders: Mapped[List["Order"]] = relationship(back_populates="customer")
+    orders: Mapped[list["Order"]] = relationship(back_populates="customer")
 
 
 class Order(Base, TimestampMixin):
@@ -83,7 +82,7 @@ class Order(Base, TimestampMixin):
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
 
     customer: Mapped["Customer"] = relationship(back_populates="orders")
-    items: Mapped[List["OrderItem"]] = relationship(
+    items: Mapped[list["OrderItem"]] = relationship(
         back_populates="order",
         cascade="all, delete-orphan",
         lazy="selectin",

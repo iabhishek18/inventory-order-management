@@ -1,5 +1,4 @@
 from functools import cached_property, lru_cache
-from typing import List
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -33,7 +32,7 @@ class Settings(BaseSettings):
     LOW_STOCK_THRESHOLD: int = 10
 
     @cached_property
-    def BACKEND_CORS_ORIGINS(self) -> List[str]:
+    def BACKEND_CORS_ORIGINS(self) -> list[str]:
         return [o.strip() for o in self.BACKEND_CORS_ORIGINS_RAW.split(",") if o.strip()]
 
     @property
