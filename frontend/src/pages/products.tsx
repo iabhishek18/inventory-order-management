@@ -4,7 +4,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { motion } from "framer-motion";
+import { Loader2, Package, Pencil, Plus, Search, Trash2 } from "lucide-react";
+
 import { productsApi } from "@/api/endpoints";
 import type { Product, ProductInput } from "@/api/types";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -28,6 +31,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  PageTransition,
+  staggerContainer,
+  staggerItem,
+} from "@/components/page-transition";
 import { extractApiError, formatCurrency } from "@/lib/errors";
 
 const schema = z.object({
@@ -114,128 +122,174 @@ export function ProductsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Products</h1>
-          <p className="text-sm text-slate-500">Manage your catalog and stock levels.</p>
-        </div>
-        <Button
-          onClick={() => {
-            setEditing(null);
-            setOpen(true);
-          }}
+    <PageTransition>
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="show"
+        className="space-y-6"
+      >
+        <motion.div
+          variants={staggerItem}
+          className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
         >
-          <Plus className="mr-2 h-4 w-4" />
-          Add product
-        </Button>
-      </div>
-
-      <Card>
-        <CardContent className="pt-6">
-          <Input
-            placeholder="Search by name, SKU, or description..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="max-w-sm"
-          />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>SKU</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="text-right">Price</TableHead>
-                  <TableHead className="text-right">Stock</TableHead>
-                  <TableHead className="w-32 text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="py-10 text-center text-slate-500">
-                      Loading...
-                    </TableCell>
-                  </TableRow>
-                ) : filtered.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="py-10 text-center text-slate-500">
-                      No products found.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filtered.map((p) => (
-                    <TableRow key={p.id}>
-                      <TableCell className="font-mono text-xs">{p.sku}</TableCell>
-                      <TableCell className="font-medium">{p.name}</TableCell>
-                      <TableCell className="max-w-sm truncate text-slate-600">
-                        {p.description ?? "—"}
-                      </TableCell>
-                      <TableCell className="text-right">{formatCurrency(p.price)}</TableCell>
-                      <TableCell className="text-right">
-                        <Badge
-                          variant={
-                            p.quantity_in_stock === 0
-                              ? "destructive"
-                              : p.quantity_in_stock <= 10
-                                ? "warning"
-                                : "secondary"
-                          }
-                        >
-                          {p.quantity_in_stock}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              setEditing(p);
-                              setOpen(true);
-                            }}
-                            aria-label={`Edit ${p.name}`}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              if (confirm(`Delete "${p.name}"?`)) deleteMut.mutate(p.id);
-                            }}
-                            aria-label={`Delete ${p.name}`}
-                          >
-                            <Trash2 className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              <Package className="h-3.5 w-3.5 text-primary" />
+              Catalog
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight">
+              <span className="gradient-text">Products</span>
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Manage your catalog and keep stock levels accurate.
+            </p>
           </div>
-        </CardContent>
-      </Card>
+          <Button
+            variant="gradient"
+            size="lg"
+            onClick={() => {
+              setEditing(null);
+              setOpen(true);
+            }}
+          >
+            <Plus className="h-4 w-4" />
+            Add product
+          </Button>
+        </motion.div>
 
-      <ProductDialog
-        open={open}
-        onOpenChange={(o) => {
-          setOpen(o);
-          if (!o) setEditing(null);
-        }}
-        product={editing}
-        onSubmit={handleSubmit}
-        submitting={createMut.isPending || updateMut.isPending}
-      />
-    </div>
+        <motion.div variants={staggerItem}>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="relative max-w-sm">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name, SKU, or description…"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div variants={staggerItem}>
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>SKU</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead className="text-right">Price</TableHead>
+                      <TableHead className="text-right">Stock</TableHead>
+                      <TableHead className="w-32 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {isLoading ? (
+                      Array.from({ length: 5 }).map((_, i) => (
+                        <TableRow key={i}>
+                          {Array.from({ length: 6 }).map((__, j) => (
+                            <TableCell key={j}>
+                              <Skeleton className="h-4 w-full" />
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))
+                    ) : filtered.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="py-14 text-center">
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                              <Package className="h-5 w-5" />
+                            </div>
+                            <p className="text-sm font-medium text-foreground">
+                              No products found
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {query ? "Try a different search term." : "Add your first product to get started."}
+                            </p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filtered.map((p) => (
+                        <TableRow key={p.id} className="group transition-colors">
+                          <TableCell className="font-mono text-xs text-muted-foreground">
+                            {p.sku}
+                          </TableCell>
+                          <TableCell className="font-medium">{p.name}</TableCell>
+                          <TableCell className="max-w-sm truncate text-muted-foreground">
+                            {p.description ?? "—"}
+                          </TableCell>
+                          <TableCell className="text-right tabular-nums">
+                            {formatCurrency(p.price)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Badge
+                              variant={
+                                p.quantity_in_stock === 0
+                                  ? "destructive"
+                                  : p.quantity_in_stock <= 10
+                                    ? "warning"
+                                    : "secondary"
+                              }
+                            >
+                              {p.quantity_in_stock}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1 opacity-70 transition-opacity group-hover:opacity-100">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  setEditing(p);
+                                  setOpen(true);
+                                }}
+                                aria-label={`Edit ${p.name}`}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  if (confirm(`Delete "${p.name}"?`)) deleteMut.mutate(p.id);
+                                }}
+                                aria-label={`Delete ${p.name}`}
+                                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <ProductDialog
+          open={open}
+          onOpenChange={(o) => {
+            setOpen(o);
+            if (!o) setEditing(null);
+          }}
+          product={editing}
+          onSubmit={handleSubmit}
+          submitting={createMut.isPending || updateMut.isPending}
+        />
+      </motion.div>
+    </PageTransition>
   );
 }
 
@@ -280,19 +334,19 @@ function ProductDialog({
         <DialogHeader>
           <DialogTitle>{product ? "Edit product" : "Add product"}</DialogTitle>
           <DialogDescription>
-            {product ? "Update product details." : "Fill out the form to add a new product."}
+            {product ? "Update product details and inventory." : "Fill out the form to add a new product."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
           <div className="space-y-2">
             <Label htmlFor="p_name">Name</Label>
             <Input id="p_name" {...register("name")} />
-            {errors.name ? <p className="text-sm text-red-600">{errors.name.message}</p> : null}
+            {errors.name ? <p className="text-xs text-destructive">{errors.name.message}</p> : null}
           </div>
           <div className="space-y-2">
             <Label htmlFor="p_sku">SKU</Label>
-            <Input id="p_sku" {...register("sku")} />
-            {errors.sku ? <p className="text-sm text-red-600">{errors.sku.message}</p> : null}
+            <Input id="p_sku" {...register("sku")} className="font-mono" />
+            {errors.sku ? <p className="text-xs text-destructive">{errors.sku.message}</p> : null}
           </div>
           <div className="space-y-2">
             <Label htmlFor="p_desc">Description</Label>
@@ -303,11 +357,11 @@ function ProductDialog({
               <Label htmlFor="p_price">Price (USD)</Label>
               <Input id="p_price" inputMode="decimal" {...register("price")} />
               {errors.price ? (
-                <p className="text-sm text-red-600">{errors.price.message}</p>
+                <p className="text-xs text-destructive">{errors.price.message}</p>
               ) : null}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="p_qty">Quantity in stock</Label>
+              <Label htmlFor="p_qty">Quantity</Label>
               <Input
                 id="p_qty"
                 type="number"
@@ -316,7 +370,7 @@ function ProductDialog({
                 {...register("quantity_in_stock")}
               />
               {errors.quantity_in_stock ? (
-                <p className="text-sm text-red-600">{errors.quantity_in_stock.message}</p>
+                <p className="text-xs text-destructive">{errors.quantity_in_stock.message}</p>
               ) : null}
             </div>
           </div>
@@ -324,8 +378,14 @@ function ProductDialog({
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "Saving..." : product ? "Save changes" : "Create"}
+            <Button type="submit" variant="gradient" disabled={submitting}>
+              {submitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : product ? (
+                "Save changes"
+              ) : (
+                "Create"
+              )}
             </Button>
           </DialogFooter>
         </form>

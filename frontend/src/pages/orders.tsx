@@ -1,7 +1,17 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Eye, Plus, Trash2 } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  ChevronDown,
+  Eye,
+  Loader2,
+  Plus,
+  Receipt,
+  ShoppingCart,
+  Trash2,
+} from "lucide-react";
+
 import { customersApi, ordersApi, productsApi } from "@/api/endpoints";
 import type { OrderInput } from "@/api/types";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -25,9 +36,37 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  PageTransition,
+  staggerContainer,
+  staggerItem,
+} from "@/components/page-transition";
 import { extractApiError, formatCurrency, formatDate } from "@/lib/errors";
+import { cn } from "@/lib/utils";
 
 type DraftItem = { product_id: number | ""; quantity: number };
+
+const selectClass = cn(
+  "flex h-10 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 pr-9 text-sm shadow-soft transition-all duration-200 ease-smooth",
+  "hover:border-foreground/20",
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:border-ring",
+  "disabled:cursor-not-allowed disabled:opacity-50",
+);
+
+function SelectWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative">
+      {children}
+      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+    </div>
+  );
+}
+
+function statusBadgeVariant(status: string): "destructive" | "secondary" | "success" {
+  if (status === "cancelled") return "destructive";
+  if (status === "completed" || status === "paid") return "success";
+  return "secondary";
+}
 
 export function OrdersPage() {
   const qc = useQueryClient();
@@ -70,123 +109,166 @@ export function OrdersPage() {
     onError: (err) => toast.error(extractApiError(err)),
   });
 
+  const newOrderDisabled = customers.length === 0 || products.length === 0;
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Orders</h1>
-          <p className="text-sm text-slate-500">Place and review customer orders.</p>
-        </div>
-        <Button
-          onClick={() => setCreateOpen(true)}
-          disabled={customers.length === 0 || products.length === 0}
+    <PageTransition>
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="show"
+        className="space-y-6"
+      >
+        <motion.div
+          variants={staggerItem}
+          className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
         >
-          <Plus className="mr-2 h-4 w-4" />
-          New order
-        </Button>
-      </div>
-
-      {customers.length === 0 || products.length === 0 ? (
-        <Card>
-          <CardContent className="pt-6 text-sm text-slate-600">
-            Add at least one customer and one product before creating orders.
-          </CardContent>
-        </Card>
-      ) : null}
-
-      <Card>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Order #</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Items</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                  <TableHead>Placed</TableHead>
-                  <TableHead className="w-32 text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="py-10 text-center text-slate-500">
-                      Loading...
-                    </TableCell>
-                  </TableRow>
-                ) : orders.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="py-10 text-center text-slate-500">
-                      No orders yet.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  orders.map((o) => (
-                    <TableRow key={o.id}>
-                      <TableCell className="font-mono text-xs">#{o.id}</TableCell>
-                      <TableCell className="font-medium">{o.customer_name}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={o.status === "cancelled" ? "destructive" : "secondary"}
-                        >
-                          {o.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">{o.item_count}</TableCell>
-                      <TableCell className="text-right">
-                        {formatCurrency(o.total_amount)}
-                      </TableCell>
-                      <TableCell className="text-sm text-slate-500">
-                        {formatDate(o.created_at)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setDetailId(o.id)}
-                            aria-label={`View order ${o.id}`}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          {o.status !== "cancelled" ? (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {
-                                if (confirm(`Cancel order #${o.id}?`)) cancelMut.mutate(o.id);
-                              }}
-                              aria-label={`Cancel order ${o.id}`}
-                            >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </Button>
-                          ) : null}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              <ShoppingCart className="h-3.5 w-3.5 text-primary" />
+              Sales
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight">
+              <span className="gradient-text">Orders</span>
+            </h1>
+            <p className="text-sm text-muted-foreground">Place and review customer orders.</p>
           </div>
-        </CardContent>
-      </Card>
+          <Button
+            variant="gradient"
+            size="lg"
+            onClick={() => setCreateOpen(true)}
+            disabled={newOrderDisabled}
+          >
+            <Plus className="h-4 w-4" />
+            New order
+          </Button>
+        </motion.div>
 
-      <CreateOrderDialog
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        onSubmit={(data) => createMut.mutate(data)}
-        submitting={createMut.isPending}
-      />
-      <OrderDetailDialog
-        id={detailId}
-        onOpenChange={(o) => {
-          if (!o) setDetailId(null);
-        }}
-      />
-    </div>
+        {newOrderDisabled ? (
+          <motion.div variants={staggerItem}>
+            <Card className="border-warning/30 bg-warning/5">
+              <CardContent className="flex items-center gap-3 pt-6 text-sm text-foreground">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-warning/15 text-warning">
+                  <Receipt className="h-4 w-4" />
+                </div>
+                <p>
+                  Add at least one <span className="font-medium">customer</span> and one{" "}
+                  <span className="font-medium">product</span> before creating orders.
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ) : null}
+
+        <motion.div variants={staggerItem}>
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Order #</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Items</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead>Placed</TableHead>
+                      <TableHead className="w-32 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {isLoading ? (
+                      Array.from({ length: 5 }).map((_, i) => (
+                        <TableRow key={i}>
+                          {Array.from({ length: 7 }).map((__, j) => (
+                            <TableCell key={j}>
+                              <Skeleton className="h-4 w-full" />
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))
+                    ) : orders.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="py-14 text-center">
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                              <Receipt className="h-5 w-5" />
+                            </div>
+                            <p className="text-sm font-medium text-foreground">No orders yet</p>
+                            <p className="text-xs text-muted-foreground">
+                              Place your first order to see it appear here.
+                            </p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      orders.map((o) => (
+                        <TableRow key={o.id} className="group transition-colors">
+                          <TableCell className="font-mono text-xs text-muted-foreground">
+                            #{o.id}
+                          </TableCell>
+                          <TableCell className="font-medium">{o.customer_name}</TableCell>
+                          <TableCell>
+                            <Badge variant={statusBadgeVariant(o.status)} className="capitalize">
+                              {o.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right tabular-nums">{o.item_count}</TableCell>
+                          <TableCell className="text-right tabular-nums font-medium">
+                            {formatCurrency(o.total_amount)}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {formatDate(o.created_at)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1 opacity-70 transition-opacity group-hover:opacity-100">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setDetailId(o.id)}
+                                aria-label={`View order ${o.id}`}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              {o.status !== "cancelled" ? (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => {
+                                    if (confirm(`Cancel order #${o.id}?`)) cancelMut.mutate(o.id);
+                                  }}
+                                  aria-label={`Cancel order ${o.id}`}
+                                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              ) : null}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <CreateOrderDialog
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          onSubmit={(data) => createMut.mutate(data)}
+          submitting={createMut.isPending}
+        />
+        <OrderDetailDialog
+          id={detailId}
+          onOpenChange={(o) => {
+            if (!o) setDetailId(null);
+          }}
+        />
+      </motion.div>
+    </PageTransition>
   );
 }
 
@@ -259,25 +341,27 @@ function CreateOrderDialog({
         <DialogHeader>
           <DialogTitle>New order</DialogTitle>
           <DialogDescription>
-            Total is calculated automatically by the server.
+            The total is calculated automatically by the server.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="o_customer">Customer</Label>
-            <select
-              id="o_customer"
-              value={customerId}
-              onChange={(e) => setCustomerId(e.target.value ? Number(e.target.value) : "")}
-              className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
-            >
-              <option value="">Select a customer...</option>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.full_name} ({c.email})
-                </option>
-              ))}
-            </select>
+            <SelectWrapper>
+              <select
+                id="o_customer"
+                value={customerId}
+                onChange={(e) => setCustomerId(e.target.value ? Number(e.target.value) : "")}
+                className={selectClass}
+              >
+                <option value="">Select a customer…</option>
+                {customers.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.full_name} ({c.email})
+                  </option>
+                ))}
+              </select>
+            </SelectWrapper>
           </div>
 
           <div className="space-y-2">
@@ -287,11 +371,8 @@ function CreateOrderDialog({
                 const product =
                   item.product_id !== "" ? productMap.get(item.product_id) : undefined;
                 return (
-                  <div
-                    key={idx}
-                    className="grid grid-cols-[1fr_120px_auto] items-end gap-2"
-                  >
-                    <div>
+                  <div key={idx} className="grid grid-cols-[1fr_120px_auto] items-end gap-2">
+                    <SelectWrapper>
                       <select
                         value={item.product_id}
                         onChange={(e) => {
@@ -302,21 +383,20 @@ function CreateOrderDialog({
                           };
                           setItems(next);
                         }}
-                        className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+                        className={selectClass}
                       >
-                        <option value="">Select a product...</option>
+                        <option value="">Select a product…</option>
                         {products.map((p) => (
                           <option
                             key={p.id}
                             value={p.id}
                             disabled={p.quantity_in_stock <= 0}
                           >
-                            {p.name} — {formatCurrency(p.price)} (stock: {p.quantity_in_stock}
-                            )
+                            {p.name} — {formatCurrency(p.price)} (stock: {p.quantity_in_stock})
                           </option>
                         ))}
                       </select>
-                    </div>
+                    </SelectWrapper>
                     <Input
                       type="number"
                       min={1}
@@ -338,8 +418,9 @@ function CreateOrderDialog({
                       onClick={() => setItems(items.filter((_, i) => i !== idx))}
                       disabled={items.length === 1}
                       aria-label="Remove item"
+                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                     >
-                      <Trash2 className="h-4 w-4 text-red-600" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 );
@@ -351,14 +432,14 @@ function CreateOrderDialog({
               size="sm"
               onClick={() => setItems([...items, { product_id: "", quantity: 1 }])}
             >
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="h-4 w-4" />
               Add item
             </Button>
           </div>
 
-          <div className="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-3">
-            <span className="text-sm font-medium text-slate-600">Estimated total</span>
-            <span className="text-lg font-semibold text-slate-900">
+          <div className="flex items-center justify-between rounded-lg border border-border/60 surface-1 px-4 py-3">
+            <span className="text-sm font-medium text-muted-foreground">Estimated total</span>
+            <span className="text-xl font-bold tabular-nums gradient-text">
               {formatCurrency(estimatedTotal)}
             </span>
           </div>
@@ -367,8 +448,8 @@ function CreateOrderDialog({
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "Placing..." : "Place order"}
+            <Button type="submit" variant="gradient" disabled={submitting}>
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Place order"}
             </Button>
           </DialogFooter>
         </form>
@@ -400,51 +481,59 @@ function OrderDetailDialog({
           </DialogDescription>
         </DialogHeader>
         {isLoading || !data ? (
-          <p className="text-sm text-slate-500">Loading...</p>
+          <div className="space-y-3">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-40 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
         ) : (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-slate-500">Customer</p>
-                <p className="font-medium text-slate-900">{data.customer_name}</p>
-                <p className="text-slate-600">{data.customer_email}</p>
+              <div className="space-y-0.5">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">Customer</p>
+                <p className="font-medium text-foreground">{data.customer_name}</p>
+                <p className="text-muted-foreground">{data.customer_email}</p>
               </div>
-              <div>
-                <p className="text-slate-500">Status</p>
-                <Badge variant={data.status === "cancelled" ? "destructive" : "secondary"}>
+              <div className="space-y-1">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">Status</p>
+                <Badge variant={statusBadgeVariant(data.status)} className="capitalize">
                   {data.status}
                 </Badge>
               </div>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>SKU</TableHead>
-                  <TableHead>Product</TableHead>
-                  <TableHead className="text-right">Qty</TableHead>
-                  <TableHead className="text-right">Unit price</TableHead>
-                  <TableHead className="text-right">Line total</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.items.map((it) => (
-                  <TableRow key={it.id}>
-                    <TableCell className="font-mono text-xs">{it.product_sku}</TableCell>
-                    <TableCell>{it.product_name}</TableCell>
-                    <TableCell className="text-right">{it.quantity}</TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(it.unit_price)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(it.line_total)}
-                    </TableCell>
+            <div className="overflow-hidden rounded-lg border border-border/60">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>SKU</TableHead>
+                    <TableHead>Product</TableHead>
+                    <TableHead className="text-right">Qty</TableHead>
+                    <TableHead className="text-right">Unit price</TableHead>
+                    <TableHead className="text-right">Line total</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <div className="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-3">
-              <span className="text-sm font-medium text-slate-600">Total</span>
-              <span className="text-lg font-semibold text-slate-900">
+                </TableHeader>
+                <TableBody>
+                  {data.items.map((it) => (
+                    <TableRow key={it.id}>
+                      <TableCell className="font-mono text-xs text-muted-foreground">
+                        {it.product_sku}
+                      </TableCell>
+                      <TableCell>{it.product_name}</TableCell>
+                      <TableCell className="text-right tabular-nums">{it.quantity}</TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {formatCurrency(it.unit_price)}
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums font-medium">
+                        {formatCurrency(it.line_total)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border/60 surface-1 px-4 py-3">
+              <span className="text-sm font-medium text-muted-foreground">Total</span>
+              <span className="text-xl font-bold tabular-nums gradient-text">
                 {formatCurrency(data.total_amount)}
               </span>
             </div>
