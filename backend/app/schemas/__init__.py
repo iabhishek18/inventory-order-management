@@ -33,6 +33,7 @@ class UserCreate(UserBase):
 
 
 class UserOut(UserBase, ORMModel):
+    email: str
     id: int
     is_active: bool
     created_at: datetime
@@ -89,6 +90,7 @@ class CustomerCreate(CustomerBase):
 
 
 class CustomerOut(CustomerBase, ORMModel):
+    email: str
     id: int
     created_at: datetime
 
@@ -117,7 +119,7 @@ class OrderOut(ORMModel):
     id: int
     customer_id: int
     customer_name: str
-    customer_email: EmailStr
+    customer_email: str
     status: str
     total_amount: Decimal
     items: list[OrderItemOut]
