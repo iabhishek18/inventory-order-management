@@ -39,7 +39,7 @@ class UserOut(UserBase, ORMModel):
 
 
 class LoginRequest(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 
