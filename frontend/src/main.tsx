@@ -29,3 +29,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     </BrowserRouter>
   </React.StrictMode>,
 );
+
+requestAnimationFrame(() => {
+  const splash = document.getElementById("ioms-splash");
+  if (!splash) return;
+  splash.classList.add("is-hiding");
+  setTimeout(() => splash.remove(), 500);
+});
