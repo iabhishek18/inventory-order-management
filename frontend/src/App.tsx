@@ -9,9 +9,6 @@ import { ProductsPage } from "@/pages/products";
 import { CustomersPage } from "@/pages/customers";
 import { OrdersPage } from "@/pages/orders";
 
-function App() {
-  const location = useLocation();
-
 const LandingPage = lazy(() =>
   import("@/pages/landing").then((m) => ({ default: m.LandingPage })),
 );
@@ -57,5 +54,3 @@ export default function App() {
     </Routes>
   );
 }
-
-export default App;
