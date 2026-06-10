@@ -20,6 +20,7 @@ export function PageTransition({ children, className }: PageTransitionProps) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const staggerContainer = {
   hidden: { opacity: 0 },
   show: {
@@ -28,6 +29,7 @@ export const staggerContainer = {
   },
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const staggerItem = {
   hidden: { opacity: 0, y: 14 },
   show: {
