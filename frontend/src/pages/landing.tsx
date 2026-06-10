@@ -17,6 +17,7 @@ import {
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { HeroSceneLazy } from "@/components/three/hero-scene-lazy";
 import {
   fadeIn,
@@ -178,6 +179,7 @@ function TopNav() {
           </a>
         </nav>
         <div className="flex items-center gap-2">
+          <ThemeToggle className="text-slate-200 hover:bg-white/10 hover:text-white" />
           <Link
             to="/login"
             className="hidden text-sm text-slate-200 transition-colors hover:text-white sm:inline-block"
