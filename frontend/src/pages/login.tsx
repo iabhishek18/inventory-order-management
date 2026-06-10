@@ -6,22 +6,15 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Boxes, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-
-import { Auth3DBackground } from "@/components/auth-3d-background";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { motion } from "framer-motion";
+import { ArrowLeft, ArrowRight, Boxes, Loader2, Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { HeroSceneLazy } from "@/components/three/hero-scene-lazy";
 import { useAuth } from "@/hooks/use-auth";
 import { extractApiError } from "@/lib/errors";
+import { fadeIn, fadeInUp, slideInLeft, stagger } from "@/lib/motion";
 
 const schema = z.object({
   email: z.string().email("Enter a valid email address"),
@@ -52,14 +45,17 @@ export function LoginPage() {
   }, [isAuthenticated, from, navigate]);
 
   if (isAuthenticated) {
-    return <Navigate to={from} replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   const onSubmit = async (values: LoginValues) => {
     setSubmitting(true);
     try {
       await login(values.email, values.password);
-      toast.success("Signed in", { description: "Welcome back to IOMS." });
+      toast.success("Signed in");
+      const from =
+        (location.state as { from?: { pathname?: string } })?.from?.pathname ||
+        "/dashboard";
       navigate(from, { replace: true });
     } catch (err) {
       toast.error(extractApiError(err, "Invalid email or password"));
@@ -69,104 +65,186 @@ export function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-10">
-      <Auth3DBackground />
-
-      <div className="absolute right-4 top-4 z-10">
-        <ThemeToggle variant="outline" />
-      </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 24, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 w-full max-w-md"
+    <div className="grid min-h-screen bg-ink-900 text-slate-100 lg:grid-cols-2">
+      <motion.aside
+        variants={slideInLeft}
+        initial="hidden"
+        animate="show"
+        className="relative isolate hidden overflow-hidden bg-ink-gradient lg:flex lg:flex-col lg:justify-between lg:p-12"
       >
-        <div className="mb-6 flex flex-col items-center text-center">
-          <motion.div
-            initial={{ scale: 0.6, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.1, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
-            className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-mesh bg-[length:200%_200%] animate-gradient-x shadow-glow"
-          >
-            <Boxes className="h-7 w-7 text-white" />
-          </motion.div>
-          <h1 className="text-2xl font-bold tracking-tight gradient-text">Welcome back</h1>
-          <p className="mt-1.5 text-sm text-muted-foreground text-balance">
-            Sign in to your IOMS workspace to manage inventory and orders.
-          </p>
-        </div>
+        <div className="pointer-events-none absolute inset-0 bg-grid opacity-40" />
+        <HeroSceneLazy className="!absolute inset-0" />
+        <div className="pointer-events-none absolute -top-24 left-1/3 h-96 w-96 rounded-full bg-violet-500/30 blur-3xl animate-aurora-slow" />
 
-        <Card className="gradient-border border-border/40 bg-card/70 shadow-floating backdrop-blur-xl">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg">Sign in</CardTitle>
-            <CardDescription>Enter your credentials to continue.</CardDescription>
-          </CardHeader>
-          <form onSubmit={handleSubmit(onSubmit)} noValidate>
-            <CardContent className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="email">Email</Label>
+        <motion.div variants={fadeInUp} className="relative z-10">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-slate-200 transition-colors hover:text-white"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="text-sm">Back to home</span>
+          </Link>
+        </motion.div>
+
+        <motion.div
+          variants={stagger(0.08, 0.2)}
+          initial="hidden"
+          animate="show"
+          className="relative z-10 space-y-6"
+        >
+          <motion.div variants={fadeInUp} className="flex items-center gap-2">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand-gradient shadow-glow-violet">
+              <Boxes className="h-5 w-5 text-white" />
+            </span>
+            <span className="font-display text-xl font-semibold tracking-wide text-white">
+              IOMS
+            </span>
+          </motion.div>
+
+          <motion.h2
+            variants={fadeInUp}
+            className="font-display text-4xl font-semibold leading-tight text-white"
+          >
+            Inventory and orders,
+            <br />
+            <span className="text-gradient">in perfect motion.</span>
+          </motion.h2>
+          <motion.p
+            variants={fadeInUp}
+            className="max-w-md text-base leading-relaxed text-slate-300/85"
+          >
+            Sign in to your workspace and pick up where your operations left
+            off — stock, orders, customers, all in one calm cockpit.
+          </motion.p>
+
+          <motion.div
+            variants={fadeInUp}
+            className="flex items-center gap-3 pt-2 text-sm text-slate-400"
+          >
+            <div className="flex -space-x-2">
+              {[1, 2, 3].map((i) => (
+                <img
+                  key={i}
+                  alt=""
+                  loading="lazy"
+                  src={`https://i.pravatar.cc/64?u=ioms-login-${i}`}
+                  className="h-8 w-8 rounded-full border-2 border-ink-900 object-cover"
+                />
+              ))}
+            </div>
+            <span>Trusted by 12,000+ operators</span>
+          </motion.div>
+        </motion.div>
+      </motion.aside>
+
+      <motion.section
+        variants={fadeIn}
+        initial="hidden"
+        animate="show"
+        className="relative flex flex-col items-center justify-center bg-white p-6 text-slate-900 lg:p-12"
+      >
+        <Link
+          to="/"
+          className="absolute left-6 top-6 inline-flex items-center gap-2 text-slate-600 transition-colors hover:text-slate-900 lg:hidden"
+        >
+          <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-gradient">
+            <Boxes className="h-4 w-4 text-white" />
+          </span>
+          <span className="font-display text-base font-semibold">IOMS</span>
+        </Link>
+
+        <motion.div
+          variants={stagger(0.06, 0.1)}
+          initial="hidden"
+          animate="show"
+          className="w-full max-w-md"
+        >
+          <motion.h1
+            variants={fadeInUp}
+            className="font-display text-3xl font-semibold tracking-tight text-slate-900"
+          >
+            Welcome back
+          </motion.h1>
+          <motion.p variants={fadeInUp} className="mt-2 text-sm text-slate-500">
+            Sign in to your IOMS workspace.
+          </motion.p>
+
+          <motion.form
+            variants={stagger(0.06)}
+            onSubmit={handleSubmit(onSubmit)}
+            className="mt-8 space-y-5"
+            noValidate
+          >
+            <motion.div variants={fadeInUp} className="space-y-2">
+              <Label htmlFor="email" className="text-slate-700">
+                Email
+              </Label>
+              <div className="relative">
+                <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   id="email"
                   type="email"
                   autoComplete="email"
-                  placeholder="you@company.com"
+                  placeholder="you@example.com"
+                  className="input-glow h-11 pl-10 text-slate-900"
                   {...register("email")}
                 />
-                {errors.email && (
-                  <p className="text-xs text-destructive">{errors.email.message}</p>
-                )}
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="password">Password</Label>
+              {errors.email ? (
+                <p className="text-sm text-red-600">{errors.email.message}</p>
+              ) : null}
+            </motion.div>
+
+            <motion.div variants={fadeInUp} className="space-y-2">
+              <Label htmlFor="password" className="text-slate-700">
+                Password
+              </Label>
+              <div className="relative">
+                <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   id="password"
                   type="password"
                   autoComplete="current-password"
                   placeholder="••••••••"
+                  className="input-glow h-11 pl-10 text-slate-900"
                   {...register("password")}
                 />
-                {errors.password && (
-                  <p className="text-xs text-destructive">{errors.password.message}</p>
-                )}
               </div>
+              {errors.password ? (
+                <p className="text-sm text-red-600">{errors.password.message}</p>
+              ) : null}
+            </motion.div>
 
-              <div className="rounded-md border border-dashed border-border/70 bg-surface-1 p-3 text-xs text-muted-foreground">
-                <span className="font-medium text-foreground">Demo:</span>{" "}
-                <span className="font-mono">admin@ioms.local</span> ·{" "}
-                <span className="font-mono">Admin12345!</span>
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-3 pt-2">
+            <motion.div variants={fadeInUp}>
               <Button
                 type="submit"
-                variant="gradient"
-                size="lg"
                 disabled={submitting}
-                className="w-full"
+                className="btn-gradient h-11 w-full gap-2 text-white shadow-glow-violet"
               >
                 {submitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <>
-                    Sign in
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                  </>
+                  <ArrowRight className="h-4 w-4" />
                 )}
+                Sign in
               </Button>
-              <p className="text-center text-sm text-muted-foreground">
-                New here?{" "}
-                <Link
-                  to="/register"
-                  className="font-medium text-primary underline-offset-4 hover:underline"
-                >
-                  Create an account
-                </Link>
-              </p>
-            </CardFooter>
-          </form>
-        </Card>
-      </motion.div>
+            </motion.div>
+          </motion.form>
+
+          <motion.p
+            variants={fadeInUp}
+            className="mt-8 text-center text-sm text-slate-500"
+          >
+            No account?{" "}
+            <Link
+              to="/register"
+              className="font-medium text-brand-600 transition-colors hover:text-brand-700 hover:underline"
+            >
+              Create one
+            </Link>
+          </motion.p>
+        </motion.div>
+      </motion.section>
     </div>
   );
 }

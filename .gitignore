@@ -59,3 +59,13 @@ logs/
 # Coverage
 coverage/
 .nyc_output/
+
+# Local tooling artifacts
+.playwright-mcp/
+.sisyphus/
+
+# Local screenshots / dev artifacts at repo root
+/landing-hero.png
+/login-page.png
+/register-page.png
+

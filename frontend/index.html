@@ -2,32 +2,185 @@
 <html lang="en" suppressHydrationWarning>
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0b0f17" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="description" content="IOMS — a modern inventory and orders management system." />
-    <title>IOMS · Inventory & Orders</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1023" />
+    <meta
+      name="description"
+      content="IOMS — Inventory and orders, in perfect motion. A premium inventory & order management platform."
+    />
+    <title>IOMS · Inventory in motion</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
     />
-    <script>
-      // Prevent theme flash: read stored theme synchronously before paint.
-      (function () {
-        try {
-          var stored = localStorage.getItem('ioms-theme');
-          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          var theme = stored === 'light' || stored === 'dark' ? stored : prefersDark ? 'dark' : 'light';
-          document.documentElement.classList.add(theme);
-          document.documentElement.style.colorScheme = theme;
-        } catch (_) {}
-      })();
-    </script>
+
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #0b1023;
+        color: #e2e8f0;
+        font-family:
+          "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+      }
+      #ioms-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        background:
+          radial-gradient(
+            ellipse at 30% 20%,
+            rgba(124, 58, 237, 0.35) 0,
+            transparent 55%
+          ),
+          radial-gradient(
+            ellipse at 70% 80%,
+            rgba(34, 211, 238, 0.18) 0,
+            transparent 55%
+          ),
+          linear-gradient(180deg, #0b1023 0%, #1a0b2e 100%);
+        transition: opacity 380ms ease;
+      }
+      #ioms-splash.is-hiding {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .ioms-splash__mark {
+        position: relative;
+        width: 84px;
+        height: 84px;
+      }
+      .ioms-splash__cube {
+        width: 100%;
+        height: 100%;
+        animation: ioms-float 3.6s ease-in-out infinite;
+      }
+      .ioms-splash__ring {
+        position: absolute;
+        inset: -14px;
+        border-radius: 999px;
+        border: 2px solid transparent;
+        border-top-color: #22d3ee;
+        border-right-color: rgba(124, 58, 237, 0.6);
+        animation: ioms-spin 1.4s linear infinite;
+        filter: drop-shadow(0 0 18px rgba(124, 58, 237, 0.55));
+      }
+      .ioms-splash__brand {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+      }
+      .ioms-splash__title {
+        font-family: "Space Grotesk", "Inter", sans-serif;
+        font-weight: 600;
+        font-size: 22px;
+        letter-spacing: 0.18em;
+        background: linear-gradient(135deg, #a5b4fc, #c4b5fd 50%, #67e8f9);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .ioms-splash__sub {
+        font-size: 12px;
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+        color: rgba(226, 232, 240, 0.55);
+      }
+      .ioms-splash__bar {
+        width: 220px;
+        height: 2px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+      }
+      .ioms-splash__bar::after {
+        content: "";
+        display: block;
+        height: 100%;
+        width: 35%;
+        background: linear-gradient(90deg, #4f46e5, #7c3aed, #22d3ee);
+        border-radius: 999px;
+        animation: ioms-bar 1.4s ease-in-out infinite;
+      }
+      @keyframes ioms-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes ioms-float {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-6px) rotate(2deg);
+        }
+      }
+      @keyframes ioms-bar {
+        0% {
+          margin-left: -40%;
+        }
+        100% {
+          margin-left: 100%;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .ioms-splash__cube,
+        .ioms-splash__ring,
+        .ioms-splash__bar::after {
+          animation: none !important;
+        }
+      }
+    </style>
   </head>
-  <body class="min-h-screen bg-background font-sans text-foreground antialiased">
+  <body class="min-h-screen bg-background font-sans antialiased">
+    <div id="ioms-splash" aria-hidden="true">
+      <div class="ioms-splash__mark">
+        <div class="ioms-splash__ring"></div>
+        <svg
+          class="ioms-splash__cube"
+          viewBox="0 0 84 84"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <linearGradient id="ioms-stroke" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#a5b4fc" />
+              <stop offset="50%" stop-color="#c4b5fd" />
+              <stop offset="100%" stop-color="#67e8f9" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M42 8 L72 22 L72 56 L42 70 L12 56 L12 22 Z"
+            stroke="url(#ioms-stroke)"
+            stroke-width="2"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M12 22 L42 36 L72 22 M42 36 L42 70"
+            stroke="url(#ioms-stroke)"
+            stroke-width="2"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </div>
+      <div class="ioms-splash__brand">
+        <span class="ioms-splash__title">I O M S</span>
+        <span class="ioms-splash__sub">Inventory, in motion</span>
+      </div>
+      <div class="ioms-splash__bar"></div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
