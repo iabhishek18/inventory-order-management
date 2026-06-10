@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { HeroSceneLazy } from "@/components/three/hero-scene-lazy";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
 import { extractApiError } from "@/lib/errors";
 import { fadeIn, fadeInUp, slideInLeft, stagger } from "@/lib/motion";
@@ -57,7 +58,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="grid min-h-screen bg-ink-900 text-slate-100 lg:grid-cols-2">
+    <div className="grid min-h-screen bg-background text-foreground lg:grid-cols-2">
       <motion.aside
         variants={slideInLeft}
         initial="hidden"
@@ -133,11 +134,14 @@ export function LoginPage() {
         variants={fadeIn}
         initial="hidden"
         animate="show"
-        className="relative flex flex-col items-center justify-center bg-white p-6 text-slate-900 lg:p-12"
+        className="relative flex flex-col items-center justify-center bg-background p-6 text-foreground lg:p-12"
       >
+        <div className="absolute right-4 top-4 z-10">
+          <ThemeToggle />
+        </div>
         <Link
           to="/"
-          className="absolute left-6 top-6 inline-flex items-center gap-2 text-slate-600 transition-colors hover:text-slate-900 lg:hidden"
+          className="absolute left-6 top-6 inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground lg:hidden"
         >
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-gradient">
             <Boxes className="h-4 w-4 text-white" />
@@ -153,11 +157,11 @@ export function LoginPage() {
         >
           <motion.h1
             variants={fadeInUp}
-            className="font-display text-3xl font-semibold tracking-tight text-slate-900"
+            className="font-display text-3xl font-semibold tracking-tight text-foreground"
           >
             Welcome back
           </motion.h1>
-          <motion.p variants={fadeInUp} className="mt-2 text-sm text-slate-500">
+          <motion.p variants={fadeInUp} className="mt-2 text-sm text-muted-foreground">
             Sign in to your IOMS workspace.
           </motion.p>
 
@@ -168,42 +172,42 @@ export function LoginPage() {
             noValidate
           >
             <motion.div variants={fadeInUp} className="space-y-2">
-              <Label htmlFor="email" className="text-slate-700">
+              <Label htmlFor="email" className="text-foreground/85">
                 Email
               </Label>
               <div className="relative">
-                <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
                   autoComplete="email"
                   placeholder="you@example.com"
-                  className="input-glow h-11 pl-10 text-slate-900"
+                  className="input-glow h-11 pl-10 text-foreground"
                   {...register("email")}
                 />
               </div>
               {errors.email ? (
-                <p className="text-sm text-red-600">{errors.email.message}</p>
+                <p className="text-sm text-destructive">{errors.email.message}</p>
               ) : null}
             </motion.div>
 
             <motion.div variants={fadeInUp} className="space-y-2">
-              <Label htmlFor="password" className="text-slate-700">
+              <Label htmlFor="password" className="text-foreground/85">
                 Password
               </Label>
               <div className="relative">
-                <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="password"
                   type="password"
                   autoComplete="current-password"
                   placeholder="••••••••"
-                  className="input-glow h-11 pl-10 text-slate-900"
+                  className="input-glow h-11 pl-10 text-foreground"
                   {...register("password")}
                 />
               </div>
               {errors.password ? (
-                <p className="text-sm text-red-600">{errors.password.message}</p>
+                <p className="text-sm text-destructive">{errors.password.message}</p>
               ) : null}
             </motion.div>
 
@@ -225,12 +229,12 @@ export function LoginPage() {
 
           <motion.p
             variants={fadeInUp}
-            className="mt-8 text-center text-sm text-slate-500"
+            className="mt-8 text-center text-sm text-muted-foreground"
           >
             No account?{" "}
             <Link
               to="/register"
-              className="font-medium text-brand-600 transition-colors hover:text-brand-700 hover:underline"
+              className="font-medium text-primary transition-colors hover:text-primary/80 hover:underline"
             >
               Create one
             </Link>
