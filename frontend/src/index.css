@@ -5,8 +5,7 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222 24% 11%;
-
+    --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --primary: 243 75% 59%;
@@ -45,49 +44,6 @@
     --ring: 188 90% 55%;
   }
 
-    --card: 222 24% 8%;
-    --card-foreground: 220 14% 96%;
-
-    --popover: 222 24% 8%;
-    --popover-foreground: 220 14% 96%;
-
-    --primary: 240 80% 70%;
-    --primary-foreground: 222 24% 5%;
-
-    --secondary: 222 18% 14%;
-    --secondary-foreground: 220 14% 96%;
-
-    --muted: 222 18% 14%;
-    --muted-foreground: 220 9% 60%;
-
-    --accent: 222 18% 14%;
-    --accent-foreground: 220 14% 96%;
-
-    --destructive: 0 75% 60%;
-    --destructive-foreground: 0 0% 100%;
-
-    --success: 152 70% 50%;
-    --success-foreground: 222 24% 5%;
-
-    --warning: 38 92% 60%;
-    --warning-foreground: 26 83% 10%;
-
-    --border: 222 18% 16%;
-    --input: 222 18% 16%;
-    --ring: 240 80% 70%;
-
-    --surface-1: 222 24% 7%;
-    --surface-2: 222 18% 11%;
-
-    --gradient-from: 240 80% 65%;
-    --gradient-via: 280 80% 60%;
-    --gradient-to: 200 90% 60%;
-
-    --shadow-color: 0 0% 0%;
-  }
-}
-
-@layer base {
   * {
     @apply border-border;
   }

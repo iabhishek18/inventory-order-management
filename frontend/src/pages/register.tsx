@@ -3,9 +3,6 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link, Navigate, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowRight, Boxes, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import {
@@ -27,12 +24,12 @@ import { extractApiError } from "@/lib/errors";
 import { fadeIn, fadeInUp, slideInLeft, stagger } from "@/lib/motion";
 
 const schema = z.object({
-  full_name: z.string().min(2, "Tell us your name"),
+  full_name: z.string().min(2, "Full name is required"),
   email: z.string().email("Enter a valid email address"),
-  password: z.string().min(8, "Use at least 8 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-type RegisterValues = z.infer<typeof schema>;
+type FormValues = z.infer<typeof schema>;
 
 const strengthLabels = ["Too weak", "Weak", "Okay", "Strong", "Excellent"];
 const strengthColors = [
@@ -61,7 +58,7 @@ const perks = [
 ];
 
 export function RegisterPage() {
-  const { register: registerUser, isAuthenticated } = useAuth();
+  const { register: doRegister, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
 
@@ -70,7 +67,7 @@ export function RegisterPage() {
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<RegisterValues>({
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { full_name: "", email: "", password: "" },
   });
@@ -82,14 +79,14 @@ export function RegisterPage() {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const onSubmit = async (values: RegisterValues) => {
+  const onSubmit = async (values: FormValues) => {
     setSubmitting(true);
     try {
       await doRegister(values.email, values.full_name, values.password);
       toast.success("Account created");
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      toast.error(extractApiError(err, "Unable to create account"));
+      toast.error(extractApiError(err, "Registration failed"));
     } finally {
       setSubmitting(false);
     }

@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowRight, Boxes, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Boxes, Loader2, Mail, Lock } from "lucide-react";
@@ -21,7 +19,7 @@ const schema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-type LoginValues = z.infer<typeof schema>;
+type FormValues = z.infer<typeof schema>;
 
 export function LoginPage() {
   const { login, isAuthenticated } = useAuth();
@@ -29,26 +27,20 @@ export function LoginPage() {
   const location = useLocation();
   const [submitting, setSubmitting] = useState(false);
 
-  const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? "/";
-
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginValues>({
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { email: "", password: "" },
   });
-
-  useEffect(() => {
-    if (isAuthenticated) navigate(from, { replace: true });
-  }, [isAuthenticated, from, navigate]);
 
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const onSubmit = async (values: LoginValues) => {
+  const onSubmit = async (values: FormValues) => {
     setSubmitting(true);
     try {
       await login(values.email, values.password);
