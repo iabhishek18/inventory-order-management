@@ -5,40 +5,56 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
     --primary: 243 75% 59%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 38%;
+    --accent: 210 40% 94%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
     --ring: 243 75% 59%;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 232 47% 9%;
+    --background: 232 47% 7%;
     --foreground: 210 40% 98%;
-    --card: 232 40% 12%;
+    --card: 232 40% 11%;
     --card-foreground: 210 40% 98%;
+    --popover: 232 40% 11%;
+    --popover-foreground: 210 40% 98%;
     --primary: 252 90% 70%;
     --primary-foreground: 232 47% 9%;
     --secondary: 232 25% 18%;
     --secondary-foreground: 210 40% 98%;
     --muted: 232 25% 16%;
-    --muted-foreground: 220 15% 70%;
-    --accent: 252 90% 70%;
-    --accent-foreground: 232 47% 9%;
-    --destructive: 0 62.8% 50%;
+    --muted-foreground: 220 18% 72%;
+    --accent: 232 25% 22%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 75% 60%;
     --destructive-foreground: 210 40% 98%;
+    --success: 152 70% 50%;
+    --success-foreground: 232 47% 9%;
+    --warning: 38 95% 60%;
+    --warning-foreground: 232 47% 9%;
+    --info: 199 90% 60%;
+    --info-foreground: 232 47% 9%;
     --border: 232 25% 22%;
     --input: 232 25% 22%;
     --ring: 188 90% 55%;
@@ -109,7 +125,8 @@
     color: transparent;
   }
 
-  .text-gradient-brand {
+  .text-gradient-brand,
+  .gradient-text {
     background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #06b6d4 100%);
     -webkit-background-clip: text;
     background-clip: text;
@@ -170,6 +187,19 @@
       ellipse at center,
       #000 30%,
       transparent 75%
+    );
+  }
+
+  .grid-mask {
+    background-image:
+      linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: radial-gradient(ellipse at center, #000 40%, transparent 80%);
+    -webkit-mask-image: radial-gradient(
+      ellipse at center,
+      #000 40%,
+      transparent 80%
     );
   }
 
