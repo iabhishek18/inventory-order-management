@@ -186,12 +186,15 @@ function TopNav() {
           >
             Sign in
           </Link>
-          <Link to="/register">
-            <Button className="btn-gradient h-9 gap-1 px-4 text-sm text-white shadow-glow-violet">
+          <Button
+            asChild
+            className="btn-gradient h-9 gap-1 px-4 text-sm text-white shadow-glow-violet"
+          >
+            <Link to="/register">
               Get started
               <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
     </header>
@@ -252,24 +255,24 @@ function Hero() {
             variants={fadeInUp}
             className="mt-9 flex flex-col gap-3 sm:flex-row"
           >
-            <Link to="/register">
-              <Button
-                size="lg"
-                className="btn-gradient h-12 w-full gap-2 px-6 text-white shadow-glow-violet sm:w-auto"
-              >
+            <Button
+              asChild
+              size="lg"
+              className="btn-gradient h-12 w-full gap-2 px-6 text-white shadow-glow-violet sm:w-auto"
+            >
+              <Link to="/register">
                 Start free
                 <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-            <Link to="/login">
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-12 w-full gap-2 border-white/15 bg-white/[0.04] px-6 text-slate-100 backdrop-blur transition-all hover:border-white/30 hover:bg-white/10 sm:w-auto"
-              >
-                Sign in
-              </Button>
-            </Link>
+              </Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="h-12 w-full gap-2 border-white/15 bg-white/[0.04] px-6 text-slate-100 backdrop-blur transition-all hover:border-white/30 hover:bg-white/10 sm:w-auto"
+            >
+              <Link to="/login">Sign in</Link>
+            </Button>
           </motion.div>
 
           <motion.div
@@ -548,24 +551,24 @@ function CTA() {
               Two-minute setup. Free forever for solo operators. No credit card.
             </p>
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link to="/register">
-                <Button
-                  size="lg"
-                  className="btn-gradient h-12 gap-2 px-7 text-white shadow-glow-violet"
-                >
+              <Button
+                asChild
+                size="lg"
+                className="btn-gradient h-12 gap-2 px-7 text-white shadow-glow-violet"
+              >
+                <Link to="/register">
                   Create your workspace
                   <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link to="/login">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="h-12 gap-2 border-white/15 bg-white/[0.04] px-7 text-slate-100 backdrop-blur hover:border-white/30 hover:bg-white/10"
-                >
-                  I already have an account
-                </Button>
-              </Link>
+                </Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="h-12 gap-2 border-white/15 bg-white/[0.04] px-7 text-slate-100 backdrop-blur hover:border-white/30 hover:bg-white/10"
+              >
+                <Link to="/login">I already have an account</Link>
+              </Button>
             </div>
             <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-slate-300/80">
               {[
